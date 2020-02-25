@@ -1,7 +1,7 @@
 package com.example.solution_color;
 
-
 import android.Manifest;
+import android.app.Activity;
 import android.content.Intent;
 import androidx.preference.PreferenceManager;
 import android.content.SharedPreferences;
@@ -40,7 +40,7 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity implements OnSharedPreferenceChangeListener {
 
     //these are constants and objects that I used, use them if you wish
-    private static final String DEBUG_TAG = "CartoonActivity";
+    private static final String DEBUG_TAG = "Balsamo";
     private static final String ORIGINAL_FILE = "origfile.png";
     private static final String PROCESSED_FILE = "procfile.png";
 
@@ -71,12 +71,16 @@ public class MainActivity extends AppCompatActivity implements OnSharedPreferenc
     Bitmap bmpThresholded;              //the black and white version of original image
     Bitmap bmpThresholdedColor;         //the colorized version of the black and white image
 
-    //TODO manage all the permissions you need
+    // Permissions Here
+    private static final String[] PERMISSIONS = {Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.CAMERA};
+    private static final int PERMS_REQ_CODE = 200;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
         //TODO be sure to set up the appbar in the activity
 
@@ -87,14 +91,19 @@ public class MainActivity extends AppCompatActivity implements OnSharedPreferenc
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //TODO manage this, mindful of permissions
+                if (!verifyPermissions())
+                    return;
+                startCamera();
+            }
 
+            private void startCamera() {
+                Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                startActivity(intent);
             }
         });
 
         //get the default image
         myImage = (ImageView) findViewById(R.id.imageView1);
-
 
         //TODO manage the preferences and the shared preference listenes
         // TODO and get the values already there getPrefValues(settings);
@@ -148,6 +157,9 @@ public class MainActivity extends AppCompatActivity implements OnSharedPreferenc
     private void setUpFileSystem(){
         //TODO do we have needed permissions?
         //TODO if not then dont proceed
+        if (!verifyPermissions()){
+            return;
+        }
 
         //get some paths
         // Create the File where the photo should go
@@ -155,7 +167,7 @@ public class MainActivity extends AppCompatActivity implements OnSharedPreferenc
         originalImagePath = photoFile.getAbsolutePath();
 
         File processedfile = createImageFile(PROCESSED_FILE);
-        processedImagePath=processedfile.getAbsolutePath();
+        processedImagePath = processedfile.getAbsolutePath();
 
         //worst case get from default image
         //save this for restoring
@@ -184,20 +196,44 @@ public class MainActivity extends AppCompatActivity implements OnSharedPreferenc
      */
     @Override
     public void onRequestPermissionsResult(int permsRequestCode, String[] permissions, int[] grantResults) {
-        //TODO fill in
+        boolean allGranted = true;
+        switch (permsRequestCode){
+            case PERMS_REQ_CODE:
+                for (int result: grantResults){
+                    allGranted = allGranted&&(result==PackageManager.PERMISSION_GRANTED);
+                }
+                break;
+        }
+        if (allGranted)
+            doTakePicture();
     }
 
-    //DUMP for students
-    /**
-     * Verify that the specific list of permisions requested have been granted, otherwise ask for
-     * these permissions.  Note this is coarse in that I assumme I need them all
-     */
-    private boolean verifyPermissions() {
 
-        //TODO fill in
+
+    private boolean verifyPermissions() {
+        //loop through all permissions seeing if they are ALL granted
+        //if ALL granted, return true
+        boolean allGranted = true;
+        for (String permission:PERMISSIONS){
+            //a single false causes allGranted to be false
+            allGranted = allGranted && (ActivityCompat.checkSelfPermission(this, permission ) == PackageManager.PERMISSION_GRANTED);
+        }
+
+        if (!allGranted){
+            // Missing some permissions, nudge user
+            for (String permission : PERMISSIONS){
+                if (ActivityCompat.shouldShowRequestPermissionRationale(this, permission)) {
+                    Snackbar.make(findViewById(android.R.id.content), permission+"Need Permissions Granted to Proceed!", Snackbar.LENGTH_LONG).show();
+                }
+            }
+            // ask for permissions
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                requestPermissions(PERMISSIONS, PERMS_REQ_CODE);
+            }
+        }
 
         //and return false until they are granted
-        return false;
+        return allGranted;
     }
 
     //take a picture and store it on external storage
@@ -314,12 +350,29 @@ public class MainActivity extends AppCompatActivity implements OnSharedPreferenc
 
     }
 
-    //TODO set this up
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        //TODO handle all of the appbar button clicks
+        int id = item.getItemId();
 
-        return true;
+        switch (id){
+
+            case R.id.revertButt:
+                doReset();
+
+            case R.id.editButt:
+                doSketch();
+
+            case R.id.viewButt:
+                doColorize();
+
+            case R.id.shareButt:
+                //Todo add share
+
+            case R.id.action_settings:
+                Intent settingsIntent = new Intent(this,SettingsActivity.class);
+                startActivity(settingsIntent);
+        }
+        return super.onOptionsItemSelected(item);   //default
     }
 
     //TODO set up pref changes

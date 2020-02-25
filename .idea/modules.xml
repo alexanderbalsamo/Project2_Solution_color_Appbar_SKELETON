@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/Project2_Camera_Appbar.iml" filepath="$PROJECT_DIR$/Project2_Camera_Appbar.iml" group="Project2_Camera_Appbar" />
+      <module fileurl="file://$PROJECT_DIR$/bitmap_utilities/bitmap_utilities.iml" filepath="$PROJECT_DIR$/bitmap_utilities/bitmap_utilities.iml" group="Project2_Camera_Appbar/bitmap_utilities" />
+      <module fileurl="file://$PROJECT_DIR$/project2_Solution_color_SKELETON/project2_Solution_color_SKELETON.iml" filepath="$PROJECT_DIR$/project2_Solution_color_SKELETON/project2_Solution_color_SKELETON.iml" group="Project2_Camera_Appbar/project2_Solution_color_SKELETON" />
+    </modules>
+  </component>
+</project>

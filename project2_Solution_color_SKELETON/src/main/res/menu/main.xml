@@ -1,5 +1,34 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-
-<!--TODO fill these in-->
+    <item
+        android:id="@+id/revertButt"
+        android:orderInCategory="100"
+        android:title="i1"
+        android:icon="@android:drawable/ic_menu_revert"
+        android:onClick="doReset"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/editButt"
+        android:orderInCategory="200"
+        android:title="i2"
+        android:icon="@android:drawable/ic_menu_edit"
+        android:onClick="doSketch"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/viewButt"
+        android:orderInCategory="300"
+        android:title="i3"
+        android:icon="@android:drawable/ic_menu_view"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/shareButt"
+        android:orderInCategory="400"
+        android:title="i4"
+        android:icon="@android:drawable/ic_menu_share"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/action_settings"
+        android:orderInCategory="500"
+        android:title="@string/action_settings"
+        app:showAsAction="never" />
 </menu>

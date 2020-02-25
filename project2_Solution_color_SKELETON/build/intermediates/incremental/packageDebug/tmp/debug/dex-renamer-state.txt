@@ -1,0 +1,10 @@
+#Tue Feb 25 16:18:22 EST 2020
+path.2=classes_0.dex
+path.1=classes.dex
+path.0=classes.dex
+renamed.2=classes3.dex
+renamed.1=classes2.dex
+renamed.0=classes.dex
+base.2=/home/abalsamo/Documents/AndroidStudioProjects/Project2_Camera_Appbar/project2_Solution_color_SKELETON/build/intermediates/dex/debug/mergeLibDexDebug/out/classes_0.dex
+base.1=/home/abalsamo/Documents/AndroidStudioProjects/Project2_Camera_Appbar/project2_Solution_color_SKELETON/build/intermediates/dex/debug/mergeProjectDexDebug/out/classes.dex
+base.0=/home/abalsamo/Documents/AndroidStudioProjects/Project2_Camera_Appbar/project2_Solution_color_SKELETON/build/intermediates/dex/debug/mergeExtDexDebug/out/classes.dex

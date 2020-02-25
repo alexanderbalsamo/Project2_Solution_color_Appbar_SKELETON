@@ -1,0 +1,40 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="com.library.bitmap_utilities.test" >
+4
+5    <uses-sdk
+5-->/home/abalsamo/Documents/AndroidStudioProjects/Project2_Camera_Appbar/bitmap_utilities/build/intermediates/tmp/manifest/androidTest/debug/manifestMerger8535243346770053420.xml:5:5-74
+6        android:minSdkVersion="23"
+6-->/home/abalsamo/Documents/AndroidStudioProjects/Project2_Camera_Appbar/bitmap_utilities/build/intermediates/tmp/manifest/androidTest/debug/manifestMerger8535243346770053420.xml:5:15-41
+7        android:targetSdkVersion="29" />
+7-->/home/abalsamo/Documents/AndroidStudioProjects/Project2_Camera_Appbar/bitmap_utilities/build/intermediates/tmp/manifest/androidTest/debug/manifestMerger8535243346770053420.xml:5:42-71
+8
+9    <instrumentation
+9-->/home/abalsamo/Documents/AndroidStudioProjects/Project2_Camera_Appbar/bitmap_utilities/build/intermediates/tmp/manifest/androidTest/debug/manifestMerger8535243346770053420.xml:11:5-15:83
+10        android:name="android.test.InstrumentationTestRunner"
+10-->/home/abalsamo/Documents/AndroidStudioProjects/Project2_Camera_Appbar/bitmap_utilities/build/intermediates/tmp/manifest/androidTest/debug/manifestMerger8535243346770053420.xml:11:22-75
+11        android:functionalTest="false"
+11-->/home/abalsamo/Documents/AndroidStudioProjects/Project2_Camera_Appbar/bitmap_utilities/build/intermediates/tmp/manifest/androidTest/debug/manifestMerger8535243346770053420.xml:14:22-52
+12        android:handleProfiling="false"
+12-->/home/abalsamo/Documents/AndroidStudioProjects/Project2_Camera_Appbar/bitmap_utilities/build/intermediates/tmp/manifest/androidTest/debug/manifestMerger8535243346770053420.xml:13:22-53
+13        android:label="Tests for com.library.bitmap_utilities.test"
+13-->/home/abalsamo/Documents/AndroidStudioProjects/Project2_Camera_Appbar/bitmap_utilities/build/intermediates/tmp/manifest/androidTest/debug/manifestMerger8535243346770053420.xml:15:22-81
+14        android:targetPackage="com.library.bitmap_utilities.test" />
+14-->/home/abalsamo/Documents/AndroidStudioProjects/Project2_Camera_Appbar/bitmap_utilities/build/intermediates/tmp/manifest/androidTest/debug/manifestMerger8535243346770053420.xml:12:22-79
+15
+16    <application
+16-->/home/abalsamo/Documents/AndroidStudioProjects/Project2_Camera_Appbar/bitmap_utilities/build/intermediates/tmp/manifest/androidTest/debug/manifestMerger8535243346770053420.xml:7:5-9:19
+17        android:allowBackup="true"
+17-->[__tested_artifact__::bitmap_utilities] /home/abalsamo/Documents/AndroidStudioProjects/Project2_Camera_Appbar/bitmap_utilities/build/intermediates/library_manifest/debug/AndroidManifest.xml:12:9-35
+18        android:debuggable="true"
+18-->/home/abalsamo/Documents/AndroidStudioProjects/Project2_Camera_Appbar/bitmap_utilities/build/intermediates/tmp/manifest/androidTest/debug/manifestMerger8535243346770053420.xml:7:18-43
+19        android:label="@string/app_name"
+19-->[__tested_artifact__::bitmap_utilities] /home/abalsamo/Documents/AndroidStudioProjects/Project2_Camera_Appbar/bitmap_utilities/build/intermediates/library_manifest/debug/AndroidManifest.xml:13:9-41
+20        android:theme="@style/AppTheme" >
+20-->[__tested_artifact__::bitmap_utilities] /home/abalsamo/Documents/AndroidStudioProjects/Project2_Camera_Appbar/bitmap_utilities/build/intermediates/library_manifest/debug/AndroidManifest.xml:14:9-40
+21        <uses-library android:name="android.test.runner" />
+21-->/home/abalsamo/Documents/AndroidStudioProjects/Project2_Camera_Appbar/bitmap_utilities/build/intermediates/tmp/manifest/androidTest/debug/manifestMerger8535243346770053420.xml:8:9-60
+21-->/home/abalsamo/Documents/AndroidStudioProjects/Project2_Camera_Appbar/bitmap_utilities/build/intermediates/tmp/manifest/androidTest/debug/manifestMerger8535243346770053420.xml:8:23-57
+22    </application>
+23
+24</manifest>

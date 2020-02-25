@@ -15,7 +15,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:theme="@style/AppTheme.AppBarOverlay"
-        android:background="#77000000"
+        android:background="@android:color/transparent"
         android:fitsSystemWindows="true"
         >
 
@@ -24,12 +24,11 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:popupTheme="@style/AppTheme.PopupOverlay"
-
-
-            />
+            app:popupTheme="@style/AppTheme.PopupOverlay" />
 
     </com.google.android.material.appbar.AppBarLayout>
+
+    <include layout="@layout/settings_activity" />
 
     <ImageView
         android:id="@+id/imageView1"

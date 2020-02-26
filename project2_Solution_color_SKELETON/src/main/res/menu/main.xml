@@ -5,14 +5,12 @@
         android:orderInCategory="100"
         android:title="i1"
         android:icon="@android:drawable/ic_menu_revert"
-        android:onClick="doReset"
         app:showAsAction="always" />
     <item
         android:id="@+id/editButt"
         android:orderInCategory="200"
         android:title="i2"
         android:icon="@android:drawable/ic_menu_edit"
-        android:onClick="doSketch"
         app:showAsAction="always" />
     <item
         android:id="@+id/viewButt"

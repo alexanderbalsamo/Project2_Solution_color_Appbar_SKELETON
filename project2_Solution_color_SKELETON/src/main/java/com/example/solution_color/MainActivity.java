@@ -9,11 +9,13 @@ import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 
+import android.os.Environment;
 import android.provider.MediaStore;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -48,6 +50,7 @@ public class MainActivity extends AppCompatActivity implements OnSharedPreferenc
     private static final double SCALE_FROM_0_TO_255 = 2.55;
     private static final int DEFAULT_COLOR_PERCENT = 3;
     private static final int DEFAULT_BW_PERCENT = 15;
+    private static final int CAMERA_REQUEST_CODE = 12345;
 
     //preferences
     private int saturation = DEFAULT_COLOR_PERCENT;
@@ -82,8 +85,6 @@ public class MainActivity extends AppCompatActivity implements OnSharedPreferenc
         Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        //TODO be sure to set up the appbar in the activity
-
         //dont display these
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
@@ -100,7 +101,7 @@ public class MainActivity extends AppCompatActivity implements OnSharedPreferenc
         //get the default image
         myImage = (ImageView) findViewById(R.id.imageView1);
 
-        //TODO manage the preferences and the shared preference listenes
+        //TODO manage the preferences and the shared preference listeners
         // TODO and get the values already there getPrefValues(settings);
         //TODO use getPrefValues(SharedPreferences settings)
 
@@ -111,6 +112,7 @@ public class MainActivity extends AppCompatActivity implements OnSharedPreferenc
 
         setUpFileSystem();
     }
+
 
     private void setImage() {
         //prefer to display processed image if available
@@ -150,8 +152,6 @@ public class MainActivity extends AppCompatActivity implements OnSharedPreferenc
 
 
     private void setUpFileSystem(){
-        //TODO do we have needed permissions?
-        //TODO if not then dont proceed
         if (!verifyPermissions()){
             return;
         }
@@ -175,8 +175,18 @@ public class MainActivity extends AppCompatActivity implements OnSharedPreferenc
     //TODO manage creating a file to store camera image in
     //TODO where photo is stored
     private File createImageFile(final String fn) {
-        //TODO fill in
-        return null;
+        // Get safe storage directory for photos
+        File mediaStorageDir = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), DEBUG_TAG);
+
+        // Create the storage directory if it does not exist
+        if (!mediaStorageDir.exists() && !mediaStorageDir.mkdirs()){
+            Log.d(DEBUG_TAG, "failed to create directory");
+        }
+
+        // Return the file target for the photo based on filename
+        File file = new File(mediaStorageDir.getPath() + File.separator + fn);
+
+        return file;
     }
 
     //DUMP for students
@@ -199,8 +209,9 @@ public class MainActivity extends AppCompatActivity implements OnSharedPreferenc
                 }
                 break;
         }
-        if (allGranted)
-            doTakePicture();
+        if (allGranted){
+            setUpFileSystem();
+        }
     }
 
 
@@ -233,9 +244,24 @@ public class MainActivity extends AppCompatActivity implements OnSharedPreferenc
 
     //take a picture and store it on external storage
     public void doTakePicture() {
-        //TODO manage launching intent to take a picture
+        // create Intent to take a picture and return control to the calling application
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        startActivity(intent);
+        // Create a File reference to access to future access
+        File photoFile = createImageFile(ORIGINAL_FILE);
+
+        // wrap File object into a content provider
+        // required for API >= 24
+        // See https://guides.codepath.com/android/Sharing-Content-with-Intents#sharing-files-with-api-24-or-higher
+        Uri fileProvider = FileProvider.getUriForFile(MainActivity.this, "com.example.solution_color.fileprovider", photoFile);
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, fileProvider);
+        intent.putExtra("PHOTOFILE", photoFile.getAbsolutePath());
+
+        // If you call startActivityForResult() using an intent that no app can handle, your app will crash.
+        // So as long as the result is not null, it's safe to use the intent.
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            // Start the image capture intent to take photo
+            startActivityForResult(intent, CAMERA_REQUEST_CODE);
+        }
     }
 
     //TODO manage return from camera and other activities
@@ -243,6 +269,20 @@ public class MainActivity extends AppCompatActivity implements OnSharedPreferenc
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+
+        Log.d(DEBUG_TAG, "onActivtyResult");
+        if (requestCode == CAMERA_REQUEST_CODE) {
+            if (resultCode == RESULT_OK) {
+                // by this point we have the camera photo on disk
+                Bitmap takenImage = BitmapFactory.decodeFile(data.getStringExtra("PHOTOFILE"));
+                // RESIZE BITMAP, see section below
+                // Load the taken image into a preview
+                ImageView iv1 = (ImageView) findViewById(R.id.imageView1);
+                iv1.setImageBitmap(takenImage);
+            } else { // Result was a failure
+                Toast.makeText(this, "Picture wasn't taken!", Toast.LENGTH_SHORT).show();
+            }
+        }
         //TODO get photo
         //TODO set the myImage equal to the camera image returned
         //TODO tell scanner to pic up this unaltered image
@@ -254,7 +294,6 @@ public class MainActivity extends AppCompatActivity implements OnSharedPreferenc
      * delete original and processed images, then rescan media paths to pick up that they are gone.
      */
     private void doReset() {
-        //TODO verify that app has permission to use file system
         //do we have needed permissions?
         if (!verifyPermissions()) {
             return;
@@ -278,7 +317,6 @@ public class MainActivity extends AppCompatActivity implements OnSharedPreferenc
     }
 
     public void doSketch() {
-        //TODO verify that app has permission to use file system
         //do we have needed permissions?
         if (!verifyPermissions()) {
             return;
@@ -300,7 +338,6 @@ public class MainActivity extends AppCompatActivity implements OnSharedPreferenc
     }
 
     public void doColorize() {
-        //TODO verify that app has permission to use file system
         //do we have needed permissions?
         if (!verifyPermissions()) {
             return;
@@ -333,7 +370,6 @@ public class MainActivity extends AppCompatActivity implements OnSharedPreferenc
     }
 
     public void doShare() {
-        //TODO verify that app has permission to use file system
         //do we have needed permissions?
         if (!verifyPermissions()) {
             return;
@@ -352,19 +388,24 @@ public class MainActivity extends AppCompatActivity implements OnSharedPreferenc
 
             case R.id.revertButt:
                 doReset();
+                break;
 
             case R.id.editButt:
                 doSketch();
+                break;
 
             case R.id.viewButt:
                 doColorize();
+                break;
 
             case R.id.shareButt:
                 //Todo add share
+                break;
 
             case R.id.action_settings:
                 Intent settingsIntent = new Intent(this,SettingsActivity.class);
                 startActivity(settingsIntent);
+                break;
         }
         return super.onOptionsItemSelected(item);   //default
     }

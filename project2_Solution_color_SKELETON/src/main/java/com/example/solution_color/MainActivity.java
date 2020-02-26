@@ -93,12 +93,7 @@ public class MainActivity extends AppCompatActivity implements OnSharedPreferenc
             public void onClick(View view) {
                 if (!verifyPermissions())
                     return;
-                startCamera();
-            }
-
-            private void startCamera() {
-                Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                startActivity(intent);
+                doTakePicture();
             }
         });
 
@@ -238,10 +233,9 @@ public class MainActivity extends AppCompatActivity implements OnSharedPreferenc
 
     //take a picture and store it on external storage
     public void doTakePicture() {
-        //TODO verify that app has permission to use camera
-
         //TODO manage launching intent to take a picture
-
+        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        startActivity(intent);
     }
 
     //TODO manage return from camera and other activities

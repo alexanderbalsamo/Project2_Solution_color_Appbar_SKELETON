@@ -1779,6 +1779,9 @@ integer mtrl_card_anim_delay_ms
 integer mtrl_card_anim_duration_ms
 integer mtrl_chip_anim_duration
 integer mtrl_tab_indicator_anim_duration_ms
+integer seek_bar_default
+integer seek_bar_max
+integer seek_bar_min
 integer show_password_duration
 integer status_bar_notification_info_maxnum
 interpolator btn_checkbox_checked_mtrl_animation_interpolator_0
@@ -1938,6 +1941,9 @@ string abc_toolbar_collapse_description
 string action_settings
 string app_name
 string appbar_scrolling_view_behavior
+string attachment_summary_off
+string attachment_summary_on
+string attachment_title
 string bottom_sheet_behavior
 string character_counter_content_description
 string character_counter_overflowed_content_description
@@ -1953,6 +1959,7 @@ string fab_transformation_sheet_behavior
 string hello_world
 string hide_bottom_view_on_scroll_behavior
 string icon_content_description
+string messages_header
 string mtrl_badge_numberless_content_description
 string mtrl_chip_close_icon_content_description
 string mtrl_exceed_max_badge_number_suffix
@@ -1994,11 +2001,15 @@ string path_password_eye_mask_strike_through
 string path_password_eye_mask_visible
 string path_password_strike_through
 string preference_copied
+string reply_title
 string search_menu_title
 string shareTitle
 string sharemessage
+string signature_title
 string status_bar_notification_info_overflow
 string summary_collapsed_preference_list
+string sync_header
+string sync_title
 string v7_preference_off
 string v7_preference_on
 style AlertDialog_AppCompat

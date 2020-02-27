@@ -1,15 +1,11 @@
 package com.example.solution_color;
 
 import android.Manifest;
-import android.app.Activity;
 import android.content.Intent;
-import androidx.preference.PreferenceManager;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Build;
@@ -21,13 +17,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.FileProvider;
+import androidx.preference.PreferenceManager;
 
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -37,7 +33,8 @@ import com.library.bitmap_utilities.BitMap_Helpers;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class MainActivity extends AppCompatActivity implements OnSharedPreferenceChangeListener {
 
@@ -57,6 +54,11 @@ public class MainActivity extends AppCompatActivity implements OnSharedPreferenc
     private int bwPercent = DEFAULT_BW_PERCENT;
     private String shareSubject;
     private String shareText;
+
+    //need these to track changes
+    private SharedPreferences myPreference;
+    private SharedPreferences.OnSharedPreferenceChangeListener listener = null;
+    private boolean enablePreferenceListener;
 
     //where images go
     private String originalImagePath;   //where orig image is
@@ -102,17 +104,22 @@ public class MainActivity extends AppCompatActivity implements OnSharedPreferenc
         myImage = (ImageView) findViewById(R.id.imageView1);
 
         //TODO manage the preferences and the shared preference listeners
-        // TODO and get the values already there getPrefValues(settings);
+        //TODO and get the values already there getPrefValues(settings);
         //TODO use getPrefValues(SharedPreferences settings)
+
+//        myPreference.registerOnSharedPreferenceChangeListener(this);
 
         // Fetch screen height and width,
         DisplayMetrics metrics = this.getResources().getDisplayMetrics();
         screenheight = metrics.heightPixels;
         screenwidth = metrics.widthPixels;
 
-        setUpFileSystem();
+        try {
+            setUpFileSystem();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
-
 
     private void setImage() {
         //prefer to display processed image if available
@@ -134,6 +141,7 @@ public class MainActivity extends AppCompatActivity implements OnSharedPreferenc
         //worst case get from default image
         //save this for restoring
         bmpOriginal = BitMap_Helpers.copyBitmap(myImage.getDrawable());
+        //TODO scaling original install of image (5% extra credit)
         Log.d(DEBUG_TAG, "setImage: bmpOriginal copied");
     }
 
@@ -151,7 +159,7 @@ public class MainActivity extends AppCompatActivity implements OnSharedPreferenc
     }
 
 
-    private void setUpFileSystem(){
+    private void setUpFileSystem() throws IOException {
         if (!verifyPermissions()){
             return;
         }
@@ -174,19 +182,36 @@ public class MainActivity extends AppCompatActivity implements OnSharedPreferenc
 
     //TODO manage creating a file to store camera image in
     //TODO where photo is stored
-    private File createImageFile(final String fn) {
-        // Get safe storage directory for photos
-        File mediaStorageDir = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), DEBUG_TAG);
+    String mCurrentPhotoPath;
+    private File createImageFile(final String fn) throws IOException {
+        try {
 
-        // Create the storage directory if it does not exist
-        if (!mediaStorageDir.exists() && !mediaStorageDir.mkdirs()){
-            Log.d(DEBUG_TAG, "failed to create directory");
+            // get external directories that the media scanner scans
+            File[] storageDir = getExternalMediaDirs();
+
+            //create a file
+            File imagefile = new File(storageDir[0], fn+".png");
+
+            //make sure directory is there, (it should be)
+            if (!storageDir[0].exists()) {
+                if (!storageDir[0].mkdirs()) {
+                    Log.e(DEBUG_TAG, "Failed to create file in: " + storageDir[0]);
+                    return null;
+                }
+            }
+
+            //make file where image will be stored
+            imagefile.createNewFile();
+
+            // Save a file: path for use with ACTION_VIEW intents
+            mCurrentPhotoPath = imagefile.getAbsolutePath();
+            return imagefile;
+
+        } catch (IOException ex) {
+            // Error occurred while creating the File
+            Toast.makeText(this, "Horrible biz here, IOException occurred", Toast.LENGTH_SHORT).show();
+            return null;
         }
-
-        // Return the file target for the photo based on filename
-        File file = new File(mediaStorageDir.getPath() + File.separator + fn);
-
-        return file;
     }
 
     //DUMP for students
@@ -210,11 +235,13 @@ public class MainActivity extends AppCompatActivity implements OnSharedPreferenc
                 break;
         }
         if (allGranted){
-            setUpFileSystem();
+            try {
+                setUpFileSystem();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
-
-
 
     private boolean verifyPermissions() {
         //loop through all permissions seeing if they are ALL granted
@@ -244,24 +271,36 @@ public class MainActivity extends AppCompatActivity implements OnSharedPreferenc
 
     //take a picture and store it on external storage
     public void doTakePicture() {
-        // create Intent to take a picture and return control to the calling application
+        // create intent to take picture with camera and specify storage
+        // location so we can easily get it
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        // Create a File reference to access to future access
-        File photoFile = createImageFile(ORIGINAL_FILE);
 
-        // wrap File object into a content provider
-        // required for API >= 24
-        // See https://guides.codepath.com/android/Sharing-Content-with-Intents#sharing-files-with-api-24-or-higher
-        Uri fileProvider = FileProvider.getUriForFile(MainActivity.this, "com.example.solution_color.fileprovider", photoFile);
-        intent.putExtra(MediaStore.EXTRA_OUTPUT, fileProvider);
-        intent.putExtra("PHOTOFILE", photoFile.getAbsolutePath());
+        //create a place to store the photo
+        File file = new File(Environment.getExternalStorageDirectory(), "implicit.jpg");
+        outputFileUri = Uri.fromFile(file);
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, outputFileUri);
 
-        // If you call startActivityForResult() using an intent that no app can handle, your app will crash.
-        // So as long as the result is not null, it's safe to use the intent.
         if (intent.resolveActivity(getPackageManager()) != null) {
-            // Start the image capture intent to take photo
-            startActivityForResult(intent, CAMERA_REQUEST_CODE);
-        }
+            // Create the File where the photo should go
+            File photoFile = null;
+            try {
+                photoFile = createImageFile(ORIGINAL_FILE);
+            } catch (IOException ex) {
+                // Error occurred while creating the File
+                Toast.makeText(this, "Horrible biz here, IOException occurred", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // Continue only if the File was successfully created
+            //  see https://developer.android.com/reference/androidx/core/content/FileProvider
+            if (photoFile != null) {
+                Uri photoURI = FileProvider.getUriForFile(this,
+                        "com.example.solution_color.fileprovider",
+                        photoFile);
+                intent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                startActivityForResult(intent, TAKE_PICTURE);
+            }
+       }
     }
 
     //TODO manage return from camera and other activities
@@ -269,25 +308,23 @@ public class MainActivity extends AppCompatActivity implements OnSharedPreferenc
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
-        Log.d(DEBUG_TAG, "onActivtyResult");
-        if (requestCode == CAMERA_REQUEST_CODE) {
-            if (resultCode == RESULT_OK) {
-                // by this point we have the camera photo on disk
-                Bitmap takenImage = BitmapFactory.decodeFile(data.getStringExtra("PHOTOFILE"));
-                // RESIZE BITMAP, see section below
-                // Load the taken image into a preview
-                ImageView iv1 = (ImageView) findViewById(R.id.imageView1);
-                iv1.setImageBitmap(takenImage);
-            } else { // Result was a failure
-                Toast.makeText(this, "Picture wasn't taken!", Toast.LENGTH_SHORT).show();
-            }
+        if (requestCode == TAKE_PICTURE) {
+            takepicture(resultCode);
         }
         //TODO get photo
         //TODO set the myImage equal to the camera image returned
         //TODO tell scanner to pic up this unaltered image
         //TODO save anything needed for later
+    }
 
+    private void takepicture(int resultCode) {
+        if (resultCode == RESULT_OK) {
+            setImage();
+
+            // get rid of image so we don't hog memory
+            File file = new File(mCurrentPhotoPath);
+            boolean deleted = file.delete();
+        }
     }
 
     /**
@@ -374,6 +411,18 @@ public class MainActivity extends AppCompatActivity implements OnSharedPreferenc
         if (!verifyPermissions()) {
             return;
         }
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("text/plain");
+        intent.putExtra(Intent.EXTRA_EMAIL, "alexander.balsamo.18@cnu.edu");
+        intent.putExtra(Intent.EXTRA_SUBJECT, "Project2 Picture!");
+        intent.putExtra(Intent.EXTRA_TEXT, "Here is my Processed Photo from my very own camera app.");
+        File file = new File(Environment.getExternalStorageDirectory(), mCurrentPhotoPath);
+        if (!file.exists() || !file.canRead()){
+            return;
+        }
+        Uri uri = Uri.fromFile(file);
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
+        startActivity(Intent.createChooser(intent, "Send Email"));
 
         //TODO share the processed image with appropriate subject, text and file URI
         //TODO the subject and text should come from the preferences set in the Settings Activity
@@ -399,7 +448,7 @@ public class MainActivity extends AppCompatActivity implements OnSharedPreferenc
                 break;
 
             case R.id.shareButt:
-                //Todo add share
+                doShare();
                 break;
 
             case R.id.action_settings:
@@ -413,7 +462,7 @@ public class MainActivity extends AppCompatActivity implements OnSharedPreferenc
     //TODO set up pref changes
     @Override
     public void onSharedPreferenceChanged(SharedPreferences arg0, String arg1) {
-        //TODO reload prefs at this point
+    //TODO the thing
     }
 
     /**

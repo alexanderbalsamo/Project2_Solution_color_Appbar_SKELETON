@@ -7,13 +7,15 @@
         <EditTextPreference
             app:key="Share Subject"
             app:title="@string/shareSubject"
-            app:defaultValue="@string/shareSubject"
+            app:summary="@string/shareSubject"
+            app:defaultValue="@string/shareTitle"
             app:useSimpleSummaryProvider="true" />
 
         <EditTextPreference
             app:key="Share Text"
             app:title="@string/shareText"
-            app:defaultValue="@string/shareText"
+            app:summary="@string/shareText"
+            app:defaultValue="@string/sharemessage"
             app:useSimpleSummaryProvider="true" />
 
     </PreferenceCategory>

@@ -10,6 +10,7 @@ import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.nio.IntBuffer;
 
@@ -395,7 +396,7 @@ public class ManipBitmap {
             base.copyPixelsFromBuffer(buffOut);
 
         } catch (Exception e) {
-            // TODO: handle exception
+            throw new NullPointerException();
         }
 
         return base;

@@ -33,6 +33,7 @@ import com.google.android.material.snackbar.Snackbar;
 import com.library.bitmap_utilities.BitMap_Helpers;
 
 import java.io.File;
+import java.io.FilePermission;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -51,6 +52,7 @@ public class MainActivity extends AppCompatActivity implements OnSharedPreferenc
     private static final int CAMERA_REQUEST_CODE = 12345;
 
     //preferences
+    private static final String PREF_FILE_NAME = "PrefFile";
     private int saturation = DEFAULT_COLOR_PERCENT;
     private int bwPercent = DEFAULT_BW_PERCENT;
     private String shareSubject;
@@ -104,19 +106,15 @@ public class MainActivity extends AppCompatActivity implements OnSharedPreferenc
         //get the default image
         myImage = (ImageView) findViewById(R.id.imageView1);
 
-        //TODO manage the preferences and the shared preference listeners
-        //TODO and get the values already there getPrefValues(settings);
-        //TODO use getPrefValues(SharedPreferences settings)
-
         // Set up preferences and listener
         if (myPreference == null) {
-            myPreference = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+            myPreference = PreferenceManager.getDefaultSharedPreferences(this);
         }
         if (listener == null){
             listener = this;
         }
         myPreference.registerOnSharedPreferenceChangeListener(listener);
-
+//        myPreference = getSharedPreferences("PrefFile", MODE_PRIVATE);
         getPrefValues(myPreference);
 
         // Fetch screen height and width,
@@ -140,7 +138,7 @@ public class MainActivity extends AppCompatActivity implements OnSharedPreferenc
             return;
         }
 
-        //otherwise fall back to unprocessd photo
+        //otherwise fall back to unprocessed photo
         bmpOriginal = Camera_Helpers.loadAndScaleImage(originalImagePath, screenheight, screenwidth);
         if (bmpOriginal != null) {
             myImage.setImageBitmap(bmpOriginal);
@@ -151,24 +149,15 @@ public class MainActivity extends AppCompatActivity implements OnSharedPreferenc
         //worst case get from default image
         //save this for restoring
         bmpOriginal = BitMap_Helpers.copyBitmap(myImage.getDrawable());
-        //TODO scaling original install of image (5% extra credit)
+        myImage.setImageBitmap(bmpOriginal); // Extra 5% Credit! Image now fills whole screen on install!
         Log.d(DEBUG_TAG, "setImage: bmpOriginal copied");
     }
 
-    //TODO use this to set the following member preferences whenever preferences are changed.
-    //TODO Please ensure that this function is called by your preference change listener
     private void getPrefValues(SharedPreferences settings) {
-        shareSubject = settings.getString("shareSubject", "Default");
-        shareText = settings.getString("shareText", "Default");
-        saturation = settings.getInt("saturation", DEFAULT_COLOR_PERCENT);
-        bwPercent = settings.getInt("bwPercent", DEFAULT_BW_PERCENT);
-    }
-
-    private void setPrefValues(SharedPreferences settings) {
-        SharedPreferences.Editor editor  = settings.edit();
-        editor.putString("shareSubject", String.valueOf(R.string.sharemessage));
-        editor.putString("shareText", String.valueOf(R.string.shareTitle));
-
+        shareSubject = settings.getString("Share Subject","");
+        shareText = settings.getString("Share Text", "");
+        saturation = settings.getInt("Sketchiness", 0);
+        bwPercent = settings.getInt("Saturation", 0);
     }
 
     @Override
@@ -208,7 +197,7 @@ public class MainActivity extends AppCompatActivity implements OnSharedPreferenc
             File[] storageDir = getExternalMediaDirs();
 
             //create a file
-            File imagefile = new File(storageDir[0], fn+".png");
+            File imagefile = new File(storageDir[0], fn);
 
             //make sure directory is there, (it should be)
             if (!storageDir[0].exists()) {
@@ -332,11 +321,6 @@ public class MainActivity extends AppCompatActivity implements OnSharedPreferenc
     private void takepicture(int resultCode) {
         if (resultCode == RESULT_OK) {
             setImage();
-            //TODO picture only saves after processing for some reason
-
-            // get rid of image so we don't hog memory
-            File file = new File(mCurrentPhotoPath);
-            boolean deleted = file.delete();
         }
     }
 
@@ -365,7 +349,6 @@ public class MainActivity extends AppCompatActivity implements OnSharedPreferenc
     }
 
     public void doSketch() {
-        //do we have needed permissions?
         if (!verifyPermissions()) {
             return;
         }
@@ -386,8 +369,6 @@ public class MainActivity extends AppCompatActivity implements OnSharedPreferenc
     }
 
     public void doColorize() {
-        //TODO only works after sketch
-        //do we have needed permissions?
         if (!verifyPermissions()) {
             return;
         }
@@ -419,26 +400,21 @@ public class MainActivity extends AppCompatActivity implements OnSharedPreferenc
     }
 
     public void doShare() {
-        //do we have needed permissions?
         if (!verifyPermissions()) {
             return;
         }
         Intent intent = new Intent(Intent.ACTION_SEND);
-        intent.setType("text/plain");
+        intent.setType("application/image");
         intent.putExtra(Intent.EXTRA_EMAIL, "alexander.balsamo.18@cnu.edu");
-        intent.putExtra(Intent.EXTRA_SUBJECT, "Project2 Picture!");
-        intent.putExtra(Intent.EXTRA_TEXT, "Here is my Processed Photo from my very own camera app.");
-        File file = new File(Environment.getExternalStorageDirectory(), mCurrentPhotoPath);
-        if (!file.exists() || !file.canRead()){
-            return;
-        }
-        Uri uri = Uri.fromFile(file);
-        intent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
+        intent.putExtra(Intent.EXTRA_SUBJECT, shareSubject);
+        intent.putExtra(Intent.EXTRA_TEXT, shareText);
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+        intent.putExtra(Intent.EXTRA_STREAM, Uri.parse(mCurrentPhotoPath));
+        Log.d(DEBUG_TAG, mCurrentPhotoPath);
         startActivity(Intent.createChooser(intent, "Send Email"));
 
         //TODO share the processed image with appropriate subject, text and file URI
-        //TODO the subject and text should come from the preferences set in the Settings Activity
-
     }
 
     @Override
@@ -471,10 +447,11 @@ public class MainActivity extends AppCompatActivity implements OnSharedPreferenc
         return super.onOptionsItemSelected(item);   //default
     }
 
-    //TODO set up pref changes
     @Override
     public void onSharedPreferenceChanged(SharedPreferences arg0, String arg1) {
-        Toast.makeText(MainActivity.this, "Changed " + arg1, Toast.LENGTH_SHORT).show();    }
+        Toast.makeText(MainActivity.this, "Changed " + arg1, Toast.LENGTH_SHORT).show();
+        getPrefValues(arg0);
+    }
 
 
 

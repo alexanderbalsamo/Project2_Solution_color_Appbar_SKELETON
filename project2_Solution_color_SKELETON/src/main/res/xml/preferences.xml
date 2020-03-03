@@ -2,49 +2,48 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     >
-    <PreferenceCategory app:title="Seekbar demonstration">
+    <PreferenceCategory app:title="Share Options">
 
-        <SeekBarPreference xmlns:android="http://schemas.android.com/apk/res/android"
-            app:key="seek_bar_key"
-            app:title="A seekbar title"
-            app:summary="and a summary"
+        <EditTextPreference
+            app:key="Share Subject"
+            app:title="@string/shareSubject"
+            app:defaultValue="@string/shareSubject"
+            app:useSimpleSummaryProvider="true" />
+
+        <EditTextPreference
+            app:key="Share Text"
+            app:title="@string/shareText"
+            app:defaultValue="@string/shareText"
+            app:useSimpleSummaryProvider="true" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="@string/renderingOptions" app:summary="@string/renderSummary">
+
+        <SeekBarPreference
+            android:id="@+id/seekSketch"
+            app:key="Sketchiness"
+            app:title="Sketchiness"
+            app:summary="@string/sketchinessDescription"
             app:defaultValue="@integer/seek_bar_default"
-            app:min="0"
-            android:max="1000"
+            app:min="@integer/seek_bar_min"
+            android:max="@integer/seek_bar_max"
             app:enabled="true"
             app:showSeekBarValue="true"
             />
-    </PreferenceCategory>
 
-    <PreferenceCategory app:title="@string/messages_header">
+        <SeekBarPreference
+            android:id="@+id/seekSat"
+            app:key="Saturation"
+            app:title="Saturation"
+            app:summary="@string/colorSeekDescription"
+            app:defaultValue="@integer/seek_bar_default"
+            app:min="@integer/seek_bar_min"
+            android:max="@integer/seek_bar_max"
+            app:enabled="true"
+            app:showSeekBarValue="true"
+            />
 
-        <EditTextPreference
-            app:key="signature"
-            app:title="@string/signature_title"
-            app:useSimpleSummaryProvider="true" />
-
-        <ListPreference
-            app:defaultValue="reply"
-            app:entries="@array/reply_entries"
-            app:entryValues="@array/reply_values"
-            app:key="reply"
-            app:title="@string/reply_title"
-            app:useSimpleSummaryProvider="true" />
-
-    </PreferenceCategory>
-
-    <PreferenceCategory app:title="@string/sync_header">
-
-        <SwitchPreferenceCompat
-            app:key="sync"
-            app:title="@string/sync_title" />
-
-        <SwitchPreferenceCompat
-            app:dependency="sync"
-            app:key="attachment"
-            app:summaryOff="@string/attachment_summary_off"
-            app:summaryOn="@string/attachment_summary_on"
-            app:title="@string/attachment_title" />
 
     </PreferenceCategory>
     

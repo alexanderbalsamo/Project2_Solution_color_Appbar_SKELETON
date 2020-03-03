@@ -8,7 +8,6 @@
     android:scaleType="fitXY"
     app:elevation="1dp">
 
-<!--    TODO add an appbar layout-->
     <!--  changed from android:background="?attr/colorPrimary" to whats below to make translucent
           change to android:background="@android:color/transparent" to make transparent-->
     <com.google.android.material.appbar.AppBarLayout

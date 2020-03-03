@@ -18,6 +18,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.FileProvider;
 import androidx.preference.PreferenceManager;
+import androidx.preference.SeekBarPreference;
 
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -107,7 +108,16 @@ public class MainActivity extends AppCompatActivity implements OnSharedPreferenc
         //TODO and get the values already there getPrefValues(settings);
         //TODO use getPrefValues(SharedPreferences settings)
 
-//        myPreference.registerOnSharedPreferenceChangeListener(this);
+        // Set up preferences and listener
+        if (myPreference == null) {
+            myPreference = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        }
+        if (listener == null){
+            listener = this;
+        }
+        myPreference.registerOnSharedPreferenceChangeListener(listener);
+
+        getPrefValues(myPreference);
 
         // Fetch screen height and width,
         DisplayMetrics metrics = this.getResources().getDisplayMetrics();
@@ -148,7 +158,17 @@ public class MainActivity extends AppCompatActivity implements OnSharedPreferenc
     //TODO use this to set the following member preferences whenever preferences are changed.
     //TODO Please ensure that this function is called by your preference change listener
     private void getPrefValues(SharedPreferences settings) {
-        //TODO should track shareSubject, shareText, saturation, bwPercent
+        shareSubject = settings.getString("shareSubject", "Default");
+        shareText = settings.getString("shareText", "Default");
+        saturation = settings.getInt("saturation", DEFAULT_COLOR_PERCENT);
+        bwPercent = settings.getInt("bwPercent", DEFAULT_BW_PERCENT);
+    }
+
+    private void setPrefValues(SharedPreferences settings) {
+        SharedPreferences.Editor editor  = settings.edit();
+        editor.putString("shareSubject", String.valueOf(R.string.sharemessage));
+        editor.putString("shareText", String.valueOf(R.string.shareTitle));
+
     }
 
     @Override
@@ -180,8 +200,6 @@ public class MainActivity extends AppCompatActivity implements OnSharedPreferenc
         setImage();
     }
 
-    //TODO manage creating a file to store camera image in
-    //TODO where photo is stored
     String mCurrentPhotoPath;
     private File createImageFile(final String fn) throws IOException {
         try {
@@ -303,23 +321,18 @@ public class MainActivity extends AppCompatActivity implements OnSharedPreferenc
        }
     }
 
-    //TODO manage return from camera and other activities
-    // TODO handle edge cases as well (no pic taken)
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == TAKE_PICTURE) {
             takepicture(resultCode);
         }
-        //TODO get photo
-        //TODO set the myImage equal to the camera image returned
-        //TODO tell scanner to pic up this unaltered image
-        //TODO save anything needed for later
     }
 
     private void takepicture(int resultCode) {
         if (resultCode == RESULT_OK) {
             setImage();
+            //TODO picture only saves after processing for some reason
 
             // get rid of image so we don't hog memory
             File file = new File(mCurrentPhotoPath);
@@ -349,8 +362,6 @@ public class MainActivity extends AppCompatActivity implements OnSharedPreferenc
         //save this for restoring
         bmpOriginal = BitMap_Helpers.copyBitmap(myImage.getDrawable());
 
-        //TODO make media scanner pick up that images are gone
-
     }
 
     public void doSketch() {
@@ -375,6 +386,7 @@ public class MainActivity extends AppCompatActivity implements OnSharedPreferenc
     }
 
     public void doColorize() {
+        //TODO only works after sketch
         //do we have needed permissions?
         if (!verifyPermissions()) {
             return;
@@ -462,8 +474,9 @@ public class MainActivity extends AppCompatActivity implements OnSharedPreferenc
     //TODO set up pref changes
     @Override
     public void onSharedPreferenceChanged(SharedPreferences arg0, String arg1) {
-    //TODO the thing
-    }
+        Toast.makeText(MainActivity.this, "Changed " + arg1, Toast.LENGTH_SHORT).show();    }
+
+
 
     /**
      * Notifies the OS to index the new image, so it shows up in Gallery.
